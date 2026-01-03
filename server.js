@@ -13,9 +13,39 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Google Sheets Setup
+// Google Sheets Setup  
+let credentialsPath;
+
+// Verificar si existe la variable de entorno GOOGLE_CREDENTIALS
+if (process.env.GOOGLE_CREDENTIALS) {
+  console.log('📋 Usando GOOGLE_CREDENTIALS desde variable de entorno');
+  
+  // Crear el archivo credentials.json temporalmente desde la variable de entorno
+  credentialsPath = path.join(__dirname, 'credentials.json');
+  
+  try {
+    // Parsear y escribir el JSON
+    const credentials = JSON.parse(process.env.GOOGLE_CREDENTIALS);
+    fs.writeFileSync(credentialsPath, JSON.stringify(credentials, null, 2));
+    console.log('✅ Archivo credentials.json creado exitosamente');
+  } catch (error) {
+    console.error('❌ Error al procesar GOOGLE_CREDENTIALS:', error.message);
+    process.exit(1);
+  }
+} else {
+  console.log('📁 Usando archivo credentials.json local');
+  credentialsPath = path.join(__dirname, 'credentials.json');
+  
+  // Verificar que el archivo existe en desarrollo
+  if (!fs.existsSync(credentialsPath)) {
+    console.error('❌ ERROR: No se encontró credentials.json y tampoco existe la variable GOOGLE_CREDENTIALS');
+    console.error('💡 Solución: Agrega la variable de entorno GOOGLE_CREDENTIALS en Railway');
+    process.exit(1);
+  }
+}
+
 const auth = new google.auth.GoogleAuth({
-  keyFile: './credentials.json',
+  keyFile: credentialsPath,
   scopes: ['https://www.googleapis.com/auth/spreadsheets'],
 });
 

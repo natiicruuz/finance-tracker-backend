@@ -1,5 +1,10 @@
-node_modules
-dist
-.env
-users.json
+# Secrets
 credentials.json
+users.json
+.env
+
+# Dependencies
+node_modules/
+
+# Logs
+*.log
